@@ -4,7 +4,9 @@ import java.util.Scanner;
 public class NQueensIO {
     public static void main(String[] args){
         NQueensSolver thread = new NQueensSolver();
-        thread.solveBoard();
+        //thread.testBoard();
+        //thread.solveBoard();
+        thread.solveGeneticAlgorithm();
     }
 
     public static int prompt(){

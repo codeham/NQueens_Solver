@@ -1,15 +1,17 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
-public class ChessBoard {
+public class ChessBoard{
     private int[] chessBoard;
     private int size;
-    ChessBoard(int size){
+    private List<Integer> costList;
+    private int heuristicCost;
+    private StateNode lowestCostSuccessor;
+    public ChessBoard(int size){
         this.size = size;
         this.chessBoard = randomizeBoard();
         //chessBoard = new int[]{4,5,6,3,4,5,6,5};
+        this.costList = new ArrayList<>();
+        this.heuristicCost = 0;
     }
 
     public int[] randomizeBoard(){
@@ -17,9 +19,6 @@ public class ChessBoard {
         List<Integer> randomNumbers = new ArrayList<>();
         while(randomNumbers.size() < size){
             int random = rand.nextInt(size);
-//            if(!randomNumbers.contains(random)){
-//                randomNumbers.add(random);
-//            }
             randomNumbers.add(random);
         }
 
@@ -39,8 +38,31 @@ public class ChessBoard {
         return chessBoard;
     }
 
+    public int getHeuristicCost() {
+        return heuristicCost;
+    }
+
     public void setChessBoard(int[] chessBoard) {
         this.chessBoard = chessBoard;
+    }
+
+    public StateNode getLowestSuccessor(){
+        List<StateNode> successors = generateSuccessors();
+        int minCost = Collections.min(costList);
+        for(StateNode x: successors){
+            if(x.getStateBoard().calculateHeuristic() == minCost){
+                //System.out.println("Lowest Heuristic Cost: " + minCost);
+                return x;
+            }
+        }
+        return null;
+    }
+
+    public boolean isGoal(){
+        if(calculateHeuristic() == 0){
+            return true;
+        }
+        return false;
     }
 
     public ChessBoard changeQueen(int colPosition, int rowPosition){
@@ -53,20 +75,22 @@ public class ChessBoard {
         return succ;
     }
 
-    public List<ChessBoard> generateSuccessors(){
+    public List<StateNode> generateSuccessors(){
         // grab the col position
         // scan down the column aisle, ignoring the original poisiton
-        List<ChessBoard> successors = new ArrayList<>();
+        //List<ChessBoard> successors = new ArrayList<>();
+        List<StateNode> successors = new ArrayList<>();
 
         for(int i = 0; i < size; i++){
-            System.out.println();
             for (int j = 0; j < size; j++){
                 if(chessBoard[i] == j){
                     continue;
                 }else{
                     // generate successor with that new moved coordinate
-                    // CURRENT ISSUE, SKIPPING 0's !!!!!
-                    successors.add(changeQueen(i, j));
+                    // add heuristic for cost to be sorted by lowest (later)
+                    costList.add(changeQueen(i, j).calculateHeuristic());
+                    StateNode node = new StateNode(changeQueen(i,j));
+                    successors.add(node);
                 }
 
             }
@@ -92,6 +116,7 @@ public class ChessBoard {
                 }
             }
         }
+//        this.heuristicCost = heuristicCost;
         return heuristicCost;
     }
 
