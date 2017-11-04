@@ -17,7 +17,11 @@ private StateNode currentState;
         GeneticAlgorithm ga = new GeneticAlgorithm(21);
         ga.generatePopulation();
         ga.sortByFitness();
-        ga.randomSelection();
+        ChessBoard x = ga.randomSelection();
+        ChessBoard y = ga.randomSelection();
+        System.out.println("Randomized Candidate X: " + x.calculateHeuristic());
+        System.out.println("Randomized Candidate Y: " + y.calculateHeuristic());
+        ga.reproduce(x, y);
     }
 
     public void solveBoard(){
