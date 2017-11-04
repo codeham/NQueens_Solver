@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class NQueensSolver {
@@ -15,13 +16,37 @@ private StateNode currentState;
 
     public void solveGeneticAlgorithm(){
         GeneticAlgorithm ga = new GeneticAlgorithm(21);
+        List<ChessBoard> newPopulation = new ArrayList<>();
         ga.generatePopulation();
         ga.sortByFitness();
-        ChessBoard x = ga.randomSelection();
-        ChessBoard y = ga.randomSelection();
-        System.out.println("Randomized Candidate X: " + x.calculateHeuristic());
-        System.out.println("Randomized Candidate Y: " + y.calculateHeuristic());
-        ga.reproduce(x, y);
+
+        for(int i = 0; i < 100; i++){
+            ChessBoard x = ga.randomSelection();
+            ChessBoard y = ga.randomSelection();
+            ChessBoard child = ga.reproduce(x, y);
+            if(child.calculateHeuristic() > 5){
+                ga.mutate(child);
+            }
+
+            if(child.isGoal()){
+                System.out.println("Board Goal Has Been Found !!!");
+                return;
+            }
+            newPopulation.add(child);
+        }
+
+
+
+//        ChessBoard x = ga.randomSelection();
+//        ChessBoard y = ga.randomSelection();
+//        System.out.println("Randomized Candidate X: " + x.calculateHeuristic());
+//        System.out.println("Randomized Candidate Y: " + y.calculateHeuristic());
+//        ChessBoard child = ga.reproduce(x, y);
+//        if(child.calculateHeuristic() > 5){
+//            ga.mutate(child);
+//        }
+//        newPopulation.add(child);
+
     }
 
     public void solveBoard(){

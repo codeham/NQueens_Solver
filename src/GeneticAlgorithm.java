@@ -26,9 +26,11 @@ public class GeneticAlgorithm{
             populationGroup.add(new ChessBoard(size));
         }
 
-//        for(ChessBoard x: populationGroup){
-//            System.out.println(x.calculateHeuristic());
-//        }
+        System.out.println("General Population Heuristic: ");
+        for(ChessBoard x: populationGroup){
+            System.out.print(x.calculateHeuristic() + ", ");
+        }
+        System.out.println();
         this.populationGroup = populationGroup;
         return populationGroup;
     }
@@ -37,13 +39,15 @@ public class GeneticAlgorithm{
         // sorts all objects in ascending order
         Collections.sort(populationGroup, comparator);
         System.out.println("Fitness Sort : ");
-//        for(ChessBoard x: populationGroup){
-//            System.out.println("Heuristic " + x.calculateHeuristic());
-//        }
+        for(ChessBoard x: populationGroup){
+            System.out.print(x.calculateHeuristic() + ", ");
+        }
+        System.out.println();
     }
 
     public ChessBoard randomSelection(){
         System.out.println("initial population size: " + populationGroup.size());
+        System.out.println("10% of strongest chromosomes: ");
         Random rand = new Random();
 
         List<ChessBoard> pickedPopulation = new ArrayList<ChessBoard>(this.populationGroup.size());
@@ -54,12 +58,13 @@ public class GeneticAlgorithm{
         // randomize selection pool
         Collections.shuffle(pickedPopulation);
         for(ChessBoard x: pickedPopulation){
-            System.out.println(x.calculateHeuristic());
+            System.out.print(x.calculateHeuristic() + ", ");
         }
+        System.out.println();
         return pickedPopulation.get(0);
     }
 
-    public void reproduce(ChessBoard candidateX, ChessBoard candidateY){
+    public ChessBoard reproduce(ChessBoard candidateX, ChessBoard candidateY){
         ChessBoard child = new ChessBoard(size);
         // randomly split both arrays
         System.out.println("Candidate X - " + Arrays.toString(candidateX.getChessBoard()));
@@ -71,13 +76,14 @@ public class GeneticAlgorithm{
         System.out.println("First Split : " + firstSplit);
         System.out.println("Second Split : " + secondSplit);
 
-        crossover(candidateX, firstSplit, candidateY, secondSplit);
+        int[] childCrossover = crossover(candidateX, firstSplit, candidateY, secondSplit);
+        child = new ChessBoard(size);
+        child.setChessBoard(childCrossover);
 
-        // [0]...[20] length = 21
-        //
+        return child;
     }
 
-    public void crossover(ChessBoard candidateX, int firstSplit, ChessBoard candidateY, int secondSplit){
+    public int[] crossover(ChessBoard candidateX, int firstSplit, ChessBoard candidateY, int secondSplit){
         int[] firstSelection = new int[firstSplit];
         int[] secondSelection = new int[secondSplit];
         //System.arraycopy(src, srcPos, dest, destPos, length)
@@ -95,6 +101,18 @@ public class GeneticAlgorithm{
         System.arraycopy(secondSelection, 0, child, firstSelection.length, secondSelection.length);
         System.out.println();
         System.out.println("Child Array: " + Arrays.toString(child));
+        return child;
+    }
+
+    public ChessBoard mutate(ChessBoard child){
+        Random rand = new Random();
+        int randomChromosome = rand.nextInt(child.getSize());
+        int randomCol = rand.nextInt(size);
+        child.getChessBoard()[randomChromosome] = randomCol;
+        System.out.println();
+        System.out.println("After Mutation @ Index " + randomChromosome);
+        System.out.println(Arrays.toString(child.getChessBoard()));
+        return  child;
     }
 }
 
