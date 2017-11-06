@@ -4,6 +4,7 @@ public class GeneticAlgorithm{
     private int size;
     private List<ChessBoard> populationGroup;
     private List<ChessBoard> pickedPopulation;
+    private int populationSize;
     Comparator<ChessBoard> comparator = new Comparator<ChessBoard>() {
         @Override
         public int compare(ChessBoard o1, ChessBoard o2) {
@@ -11,25 +12,34 @@ public class GeneticAlgorithm{
         }
     };
 
+
     GeneticAlgorithm(int size){
         this.populationGroup = new ArrayList<>();
-        this.pickedPopulation = new ArrayList<>();
+//        this.pickedPopulation = new ArrayList<>();
         this.size = size;
+        this.populationSize = 100;
     }
 
+    public List<ChessBoard> getPopulationGroup() {
+        return populationGroup;
+    }
+
+    public void setPopulationGroup(List<ChessBoard> populationGroup) {
+        this.populationGroup = populationGroup;
+    }
 
     public List<ChessBoard> generatePopulation(){
         // creates a brand new population of randomized board instances
-        int populationSize = 100;
         List<ChessBoard> populationGroup = new ArrayList<>();
         for(int i = 0; i < populationSize; i++){
             populationGroup.add(new ChessBoard(size));
         }
 
-        System.out.println("General Population Heuristic: ");
+        System.out.println("General Population Fitness (Heuristic, Fitness): ");
         for(ChessBoard x: populationGroup){
-            System.out.print(x.calculateHeuristic() + ", ");
+            System.out.print("(" + x.calculateHeuristic() + ", " + x.calculateFitness() + ")" + ", ");
         }
+        System.out.println();
         System.out.println();
         this.populationGroup = populationGroup;
         return populationGroup;
@@ -38,43 +48,53 @@ public class GeneticAlgorithm{
     public void sortByFitness(){
         // sorts all objects in ascending order
         Collections.sort(populationGroup, comparator);
-        System.out.println("Fitness Sort : ");
-        for(ChessBoard x: populationGroup){
-            System.out.print(x.calculateHeuristic() + ", ");
-        }
-        System.out.println();
+//        System.out.println("Fitness Sort : ");
+//        for(ChessBoard x: populationGroup){
+//            System.out.print("(" + x.calculateHeuristic() + ", " + x.calculateFitness() + ")" + ", ");
+//        }
+//        System.out.println();
+//        System.out.println();
     }
 
     public ChessBoard randomSelection(){
-        System.out.println("initial population size: " + populationGroup.size());
-        System.out.println("10% of strongest chromosomes: ");
         Random rand = new Random();
 
         List<ChessBoard> pickedPopulation = new ArrayList<ChessBoard>(this.populationGroup.size());
-        //picks top 10% of the top ranking population based on heuristic
-        int lastIndex = (int) (0.1 * this.populationGroup.size());
-        pickedPopulation.addAll(populationGroup.subList(0, lastIndex));
+        pickedPopulation.addAll(populationGroup);
 
-        // randomize selection pool
-        Collections.shuffle(pickedPopulation);
+       int sumTotal = 0;
         for(ChessBoard x: pickedPopulation){
-            System.out.print(x.calculateHeuristic() + ", ");
+            sumTotal += x.calculateFitness();
         }
-        System.out.println();
-        return pickedPopulation.get(0);
+
+        int randomNum = rand.nextInt(sumTotal);
+
+        int partialSum = 0;
+        for(int i = 0; i < pickedPopulation.size();i++){
+            partialSum += pickedPopulation.get(i).calculateFitness();
+            if(partialSum > randomNum){
+                //return chosen individual
+                return pickedPopulation.get(i);
+            }
+        }
+        return pickedPopulation.get(pickedPopulation.size()-1);
     }
 
     public ChessBoard reproduce(ChessBoard candidateX, ChessBoard candidateY){
         ChessBoard child = new ChessBoard(size);
         // randomly split both arrays
-        System.out.println("Candidate X - " + Arrays.toString(candidateX.getChessBoard()));
-        System.out.println("Candidate Y - " + Arrays.toString(candidateY.getChessBoard()));
+        while(Arrays.equals(candidateX.getChessBoard(), candidateY.getChessBoard())){
+            // same exact board, pick a new value
+            candidateX = randomSelection();
+        }
+//        System.out.println("Candidate X - " + Arrays.toString(candidateX.getChessBoard()));
+//        System.out.println("Candidate Y - " + Arrays.toString(candidateY.getChessBoard()));
 
         Random rand = new Random();
-        int firstSplit = 1 + rand.nextInt(size);
+        int firstSplit = rand.nextInt(size);
         int secondSplit = size - firstSplit;
-        System.out.println("First Split : " + firstSplit);
-        System.out.println("Second Split : " + secondSplit);
+//        System.out.println("First Split : " + firstSplit);
+//        System.out.println("Second Split : " + secondSplit);
 
         int[] childCrossover = crossover(candidateX, firstSplit, candidateY, secondSplit);
         child = new ChessBoard(size);
@@ -91,28 +111,36 @@ public class GeneticAlgorithm{
         System.arraycopy(candidateY.getChessBoard(), firstSelection.length, secondSelection, 0, secondSelection.length);
 
         // print out arrays
-        System.out.println();
-        System.out.println("**After Split**");
-        System.out.println("Candidate X - " + Arrays.toString(firstSelection));
-        System.out.println("Candidate Y - " + Arrays.toString(secondSelection));
+//        System.out.println();
+//        System.out.println("**After Split**");
+//        System.out.println("Candidate X - " + Arrays.toString(firstSelection));
+//        System.out.println("Candidate Y - " + Arrays.toString(secondSelection));
 
         int[] child = new int[firstSplit + secondSplit];
         System.arraycopy(firstSelection, 0, child, 0, firstSelection.length);
         System.arraycopy(secondSelection, 0, child, firstSelection.length, secondSelection.length);
-        System.out.println();
-        System.out.println("Child Array: " + Arrays.toString(child));
+//        System.out.println();
+//        System.out.println("Child Array: " + Arrays.toString(child));
         return child;
     }
 
     public ChessBoard mutate(ChessBoard child){
         Random rand = new Random();
         int randomChromosome = rand.nextInt(child.getSize());
-        int randomCol = rand.nextInt(size);
+        int randomCol = rand.nextInt(child.getSize());
         child.getChessBoard()[randomChromosome] = randomCol;
-        System.out.println();
-        System.out.println("After Mutation @ Index " + randomChromosome);
-        System.out.println(Arrays.toString(child.getChessBoard()));
+//        System.out.println();
+//        System.out.println("After Mutation @ Index " + randomChromosome);
+//        System.out.println(Arrays.toString(child.getChessBoard()));
         return  child;
+    }
+
+    public void addPopulation(List<ChessBoard> newPopulation){
+        populationGroup.addAll(newPopulation);
+        System.out.println("Best Population Group of Children: ");
+        for(ChessBoard x: populationGroup){
+            System.out.print(x.calculateHeuristic() +", ");
+        }
     }
 }
 

@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class NQueensSolver {
@@ -16,62 +17,66 @@ private StateNode currentState;
 
     public void solveGeneticAlgorithm(){
         GeneticAlgorithm ga = new GeneticAlgorithm(21);
+         //empty set
+//            ga.generatePopulation();
+//            ga.sortByFitness();
+//
+//            ChessBoard x = ga.randomSelection();
+//            ChessBoard y = ga.randomSelection();
+//
+//
+//        System.out.println("X: " + x.calculateFitness());
+//        System.out.println("Y: "+ y.calculateFitness());
+
+
+        int generationCount = 100;
         List<ChessBoard> newPopulation = new ArrayList<>();
         ga.generatePopulation();
         ga.sortByFitness();
 
-        for(int i = 0; i < 100; i++){
+
+        for(int i = 0; i < generationCount; i++){
             ChessBoard x = ga.randomSelection();
             ChessBoard y = ga.randomSelection();
-            ChessBoard child = ga.reproduce(x, y);
-            if(child.calculateHeuristic() > 5){
-                ga.mutate(child);
-            }
 
-            if(child.isGoal()){
+            if(Arrays.equals(x.getChessBoard(), y.getChessBoard())){
+                // avoids asexual
+                x = ga.randomSelection();
+            }
+            ChessBoard child = ga.reproduce(x, y);
+            System.out.println("Child(Fitness) -> " + child.calculateFitness());
+
+
+            ga.mutate(child);
+
+            newPopulation.add(child);
+            if(child.calculateHeuristic() == 210){
+                //goal heuristic
                 System.out.println("Board Goal Has Been Found !!!");
                 return;
             }
-            newPopulation.add(child);
         }
+        ga.setPopulationGroup(newPopulation);
+        ga.sortByFitness();
 
+        System.out.println("Best Found Population Fitness: " + ga.getPopulationGroup().get(0).calculateFitness());
+//
 
-
-//        ChessBoard x = ga.randomSelection();
-//        ChessBoard y = ga.randomSelection();
-//        System.out.println("Randomized Candidate X: " + x.calculateHeuristic());
-//        System.out.println("Randomized Candidate Y: " + y.calculateHeuristic());
-//        ChessBoard child = ga.reproduce(x, y);
-//        if(child.calculateHeuristic() > 5){
-//            ga.mutate(child);
-//        }
-//        newPopulation.add(child);
 
     }
 
     public void solveBoard(){
         StateNode neighbor;
-//        System.out.println("******* Initial Board *******");
-//        currentState.getStateBoard().printBoard();
-//        System.out.println("Heuristic Cost: " + currentState.getStateBoard().calculateHeuristic());
-//        System.out.println("*************************");
-
         while (!currentState.getStateBoard().isGoal()){
             // while current state is not equal to 0
             neighbor = currentState.getStateBoard().getLowestSuccessor();
             int neighborValue = neighbor.getStateBoard().calculateHeuristic();
             int currentValue = currentState.getStateBoard().calculateHeuristic();
 
-            //testing print
-//            currentState.getStateBoard().printBoard();
-//            System.out.println("Heuristic Cost: " + currentValue);
-//            System.out.println("*************************");
-
             if(neighborValue == currentValue){
                 // you have hit a plateaux
                 System.out.println("You are stuck at a plateaux");
                 System.out.println("Final heuristic : " + currentValue);
-//                System.out.println();
                 return;
             }
 
@@ -83,8 +88,6 @@ private StateNode currentState;
         }
         // exits loop if goal is found and doesn't get stuck at plateau
         System.out.println("Heuristic Goal of 0 Has Been Found ! ");
-//        currentState.getStateBoard().printBoard();
-
     }
 
     public void testBoard(){

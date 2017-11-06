@@ -6,6 +6,7 @@ public class ChessBoard{
     private List<Integer> costList;
     private int heuristicCost;
     private StateNode lowestCostSuccessor;
+    private double survivalRate;
     public ChessBoard(int size){
         this.size = size;
         this.chessBoard = randomizeBoard();
@@ -120,6 +121,39 @@ public class ChessBoard{
         return heuristicCost;
     }
 
+    public int calculateNonAttackingPairs(){
+        // total number of non attacking pairs
+        int nonAttackingPairs = 0;
+        for(int i = 0; i < size; i++){
+            for(int j = i+1; j < size; j++){
+                nonAttackingPairs++;
+            }
+        }
+
+        return nonAttackingPairs;
+    }
+
+    public int calculateFitness(){
+        // clashes = number of clashing queens
+        // fitness = 120 - clashes
+        return 210 - calculateHeuristic();
+    }
+
+    public int calculateFitnessProbability(int sumTotal){
+        System.out.println("Fitness: " + calculateFitness());
+        System.out.println("Sum Total: " + sumTotal);
+        int total = (calculateFitness()/sumTotal);
+        System.out.println(total);
+        return total;
+    }
+
+    public void setSurvivalRate(double survivalRate) {
+        this.survivalRate = survivalRate;
+    }
+
+    public double getSurvivalRate() {
+        return survivalRate;
+    }
 
     public void printBoard(){
         final String[][] twoDimBoard = new String[size][size];
